@@ -1,5 +1,4 @@
 # money-tree-game
-
-The Money Tree Game: a small Instagram coaching game for one coach.
+A game about getting clients using Instagram
 
 Live: https://blairrorani.github.io/money-tree-game/
