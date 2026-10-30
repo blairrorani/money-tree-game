@@ -3,7 +3,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Money Tree Game</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=DM+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=DM+Sans:wght@400;500;600&family=Press+Start+2P&display=swap">
 <style>
   /* Layout: one phone-width column. Home lists one coin per level; a level lists its power-ups; a power-up is one screen: why, steps, proof, done button. */
   :root {
@@ -163,8 +163,45 @@
     60% { transform: scale(1.25); }
     100% { transform: scale(1); }
   }
+
+  /* Intro: an 80s arcade start screen, shown each time the game opens. Tap to start. */
+  #intro { position: fixed; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+    padding-top: 22vh; gap: 28px; cursor: pointer; background: radial-gradient(circle at 50% 40%, #16402e 0%, #0b1f16 70%); transition: opacity .8s ease; }
+  #intro.gone { opacity: 0; pointer-events: none; }
+  #intro::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: repeating-linear-gradient(to bottom, rgba(0,0,0,.18) 0 2px, transparent 2px 4px); }
+  .intro-stage { height: 120px; display: flex; align-items: center; gap: 10px; font-size: clamp(40px, 12vw, 52px); line-height: 1; }
+  .intro-stage span { display: inline-block; opacity: 0; }
+  .intro-op { font-family: "Press Start 2P", monospace; font-size: 26px; color: #fff; }
+  .intro-coin { animation: intro-drop 1.1s cubic-bezier(.3,0,.5,1) .2s forwards; }
+  .intro-plus { animation: intro-pop .25s ease-out 1.45s forwards; }
+  .intro-drip { animation: intro-drip .55s ease-in 1.75s forwards; }
+  .intro-eq   { animation: intro-pop .25s ease-out 2.45s forwards; }
+  .intro-cash { animation: intro-grow .45s cubic-bezier(.2,1.6,.4,1) 2.8s forwards; }
+  .intro-tree { animation: intro-grow .45s cubic-bezier(.2,1.6,.4,1) 3.05s forwards; }
+  .intro-title { font-family: "Press Start 2P", monospace; color: #fff; font-size: 26px; text-align: center; line-height: 1.5;
+    text-shadow: 3px 3px 0 #2e5a44; opacity: 0; animation: intro-pop .3s ease-out 3.6s forwards; padding: 0 16px; }
+  .intro-start { font-family: "Press Start 2P", monospace; font-size: 16px; color: var(--gold); opacity: 0; margin-top: 24px;
+    animation: intro-blink 1s steps(1) 4.1s infinite; }
+  @keyframes intro-drop {
+    0% { opacity: 1; transform: translateY(-60vh); } 45% { transform: translateY(0); } 60% { transform: translateY(-38px); }
+    75% { transform: translateY(0); } 85% { transform: translateY(-12px); } 100% { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes intro-drip { 0% { opacity: 1; transform: translateY(-50vh); } 100% { opacity: 1; transform: translateY(0); } }
+  @keyframes intro-pop { 0% { opacity: 0; transform: scale(.2); } 100% { opacity: 1; transform: scale(1); } }
+  @keyframes intro-grow { 0% { opacity: 0; transform: scale(0) rotate(-20deg); } 100% { opacity: 1; transform: scale(1) rotate(0); } }
+  @keyframes intro-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) {
+    .intro-stage span, .intro-title { animation: none; opacity: 1; }
+    .intro-start { animation: none; opacity: 1; }
+  }
 </style>
 
+<div id="intro" role="button" tabindex="0" aria-label="The Money Tree Game. Tap to start">
+  <div class="intro-stage" aria-hidden="true"><span class="intro-coin">🟡</span><span class="intro-op intro-plus">+</span><span class="intro-drip">💦</span><span class="intro-op intro-eq">=</span><span class="intro-cash">💵</span><span class="intro-tree">🌴</span></div>
+  <div class="intro-title">THE MONEY<br>TREE GAME</div>
+  <div class="intro-start">TAP TO START</div>
+</div>
 <main class="wrap" id="app"></main>
 
 <script>
@@ -375,6 +412,11 @@
   }
 
   const app = document.getElementById("app");
+  // Intro screen: stays until she taps. Tests skip it with #skipintro.
+  const intro = document.getElementById("intro");
+  const startGame = () => { intro.classList.add("gone"); setTimeout(() => intro.remove(), 900); };
+  if (location.hash === "#skipintro") intro.remove();
+  else { intro.addEventListener("click", startGame); intro.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") startGame(); }); }
   let resetArmed = false, editing = null, delArmed = null;
 
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
