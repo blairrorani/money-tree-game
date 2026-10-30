@@ -412,10 +412,15 @@
   }
 
   const app = document.getElementById("app");
-  // Intro screen: stays until she taps. Tests skip it with #skipintro.
-  const intro = document.getElementById("intro");
-  const startGame = () => { intro.classList.add("gone"); setTimeout(() => intro.remove(), 900); };
-  if (location.hash === "#skipintro") intro.remove();
+  // Intro screen: once a day, and it stays until she taps. Tests skip it with #skipintro.
+  const intro = document.getElementById("intro"), INTRO_KEY = "money-tree-intro", today = new Date().toLocaleDateString("en-CA");
+  let introSeen = null;
+  try { introSeen = localStorage.getItem(INTRO_KEY); } catch (e) {}
+  const startGame = () => {
+    try { localStorage.setItem(INTRO_KEY, today); } catch (e) {}
+    intro.classList.add("gone"); setTimeout(() => intro.remove(), 900);
+  };
+  if (location.hash === "#skipintro" || introSeen === today) intro.remove();
   else { intro.addEventListener("click", startGame); intro.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") startGame(); }); }
   let resetArmed = false, editing = null, delArmed = null;
 
